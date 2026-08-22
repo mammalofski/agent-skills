@@ -4,7 +4,7 @@ These are the most useful agent skills I use for day-to-day software development
 
 ## Skills
 
-### qt - Quick Task
+### [qt - Quick Task](./skills/qt)
 
 My go-to skill for most small/medium updates to my projects.
 Designed to follow the must-do workflow every agent needs when implementing small to medium-sized tasks.
@@ -18,14 +18,14 @@ Workflow in summary (effective for most tasks):
 - Verify thoroughly.
 - Confirm user satisfaction, and close cleanly.
 
-### qd - Quick Debug
+### [qd - Quick Debug](./skills/qd)
 
 Very similar to qt, but for debugging: diagnose with evidence, plan the smallest fix, implement, and verify.
 
-### deep-plan - Deep Plan
+### [deep-plan - Deep Plan](./skills/deep-plan)
 
 For large or complex tasks, use Deep Plan (preferably with your most powerful model) to produce a versioned, implementation-ready plan, designed for sophisticated tasks requiring staff-level planning.
 
-### deep-execute - Deep Execute
+### [deep-execute - Deep Execute](./skills/deep-execute)
 
 Then use Deep Execute to implement the plan in phases, with safe multi-agent orchestration and an approval-gated commit.
