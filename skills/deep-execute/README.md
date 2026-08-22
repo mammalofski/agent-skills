@@ -12,7 +12,7 @@ Execution half of the `plan` + `execute` pair. Implements or resumes a `READY` P
 Start a fresh session and invoke:
 
 ```
-/deep-execute <path-to-plan.md>
+/deep-execute .planning/navoid-plans/<slug>/plan.md
 ```
 
 A plan directory works too; with no path, the skill auto-selects when exactly one compatible `READY` plan exists. It executes phase by phase, keeps an `execution.md` journal, and never commits without your explicit approval.

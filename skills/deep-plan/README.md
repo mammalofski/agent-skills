@@ -10,10 +10,11 @@ Planning half of the `plan` + `execute` pair. Produces a versioned, implementati
 
 ## How to use
 
+0. (optional but recommended) Have a feature/specs document for your complex task ready (FEAT-1.md).
 1. Start a session with your most powerful model.
-2. Invoke `/deep-plan <your task>`.
-3. Answer the plan-shaping questions; the skill analyzes the repository and writes a `READY` plan.
-4. Start a **fresh session** and run `/deep-execute <path-to-plan>` to implement it.
+2. Invoke `/deep-plan plan for implementing FEAT-1.md`.
+3. Answer the plan-shaping questions; the skill builds the plan and writes a `READY` plan to `.planning/navoid-plans/<slug>/plan.md`.
+4. Start a **fresh session** and run `/deep-execute .planning/navoid/<slug>/plan.md` to implement it.
 
 Deep Plan never edits source code — it writes planning artifacts only.
 
