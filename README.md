@@ -1,4 +1,4 @@
-# Simple but Powerful Agent Skills
+# Simple but Powerful Every Day Agent Skills
 
 These are the most useful agent skills I use for day-to-day software development. Designed to be concise, powerful, to the point, and effective.
 
