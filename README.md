@@ -2,6 +2,12 @@
 
 These are the most useful agent skills I use for day-to-day software development. Designed to be concise, powerful, to the point, and effective.
 
+## Why?
+
+Most skills could be good, but are too bloated, consume too much context window from the LLM, often confuse the weaker models, and requrie high learning curve to actually be useful. 
+
+These skills are minimal but get the job done, written to the best gold standards of AI engineering adapted to how most harnesses behave, and easy to understand and use, useful to most every day tasks.
+
 ## Skills
 
 ### [qt - Quick Task](./skills/qt)
