@@ -6,20 +6,21 @@
 - **NEVER ask the agent to just "do something."** ALWAYS ask the agent to plan first, review the plan, then execute after approval.
 
   - Unless the task is simple and you already have the plan, in which case, write the plan yourself, step by step.
+
   - **My current workflow:** (for medium-large tasks)
+    - For small-medium tasks:   
+        - No matter the size, I always tell the agent to understand the task and ask clarifying questions, read code and context, plan properly, execute thoroughly, verify, and close cleanly. To do so efficiently I use [quick-task](./skills/qt) and [quick-debug](./skills/qd) skills which does all the workflow for me. Just replace your usual day-to-day tasks with `/qt <task description>` or `/qd <bug description>`
+    - For medium-large tasks
+        - (optional but recommended) Prepare a well-crafted, feature and specs document. Have your initial requirements ready, then do a brainstorming session with the agent and have it to ask all the questions it needs from me to map out all the possible gray areas (bonus [grill-me](https://www.aihero.dev/skills-grill-me) or [grill-with-docs](https://www.aihero.dev/grill-with-docs) skills) if you already have the initial docs ready.
+        - I first select plan mode in my agent, (and select the most powerful model I have i.e. Opus 5 xhigh, optionally use the [deep-plan](./skills/deep-plan) skill and) ask the agent to analyze, think hard, look at everything, make a good understanding, and make a perfect plan in `.planning/navoid-plans/<slug>/plan.md` with as much as detail as possible and an executive summary. I review the executive summary, ask for adjustments if needed, and then approve it.
+        - (optional) Then have another agent revise the plan and improve.
+        - have the third agent implement with [deep-execute](./skills/deep-execute) (can be done with a weaker model if planned properly i.e. Sonnet 5).
+        - Finally a fourth agent write E2E tests and a QAT testing guide for me and I manually test it throughly. Works 99% of the time with no issues.
+        - Finally if required, I ask the agent to fix anything I find in the same session or new sessions with [quick-task](./skills/qt) and [quick-debug](./skills/qd). (which if the specs and planning are done properly, it rarely happens)
+    - For extra large tasks (like 0 to 1 implementations)
+        - I use [GSD](https://github.com/open-gsd/gsd-core) framework. Very expensive and verbose, but effective.
 
-    - (optional but recommended) Do a brainstorming session with the agent and have it to ask all the questions it needs from me to map out all the possible gray areas (bonus [grill-me](https://www.aihero.dev/skills-grill-me) or [grill-with-docs](https://www.aihero.dev/grill-with-docs) skills)
-    - I usually first (select the most powerful model I have i.e. Opus 4.8 xhigh, use the [deep-plan](./skills/deep-plan) skill and) ask the agent to analyze, think hard, look at everything, make a good understanding, and make a perfect plan in `.planning/navoid-plans/<slug>/plan.md` with as much as detail as possible and an executive summary. I review the executive summary, ask for adjustments if needed, and then approve it.
-    - (optional) Then have another agent revise the plan and improve. have the third agent implement with [deep-execute](./skills/deep-execute) (can be done with a weaker model if planned properly i.e. GPT 5.4 high).
-    - Finally a fourth agent write E2E tests and a UAT testing guide for me. Works 99% of the time with no issues.
-      - I ask the agent to fix anything I find in the same session.
-  - Bonus for small-medium tasks: install [quick-task](./skills/qt) and [quick-debug](./skills/qd) for quick fixes and adjustments with the right agent workflow - does all the above for small-medium tasks:
 
-    (To install them globally in Claude Code, copy the skill folders to `~/.claude/skills/`)
-
-    ```bash
-    cp -r skills/qt skills/qd ~/.claude/skills/
-    ```
 - **NEVER let the agent decide the architecture.** ALWAYS plan the architecture yourself and let the agent implement the details.
 
   - If you don't have the architecture or plan yet, exploit the agent's internet access to research and brainstorm. Make the plan WITH it, don't let it make the plan FOR you.
@@ -38,7 +39,7 @@
     - Always add an extra 2 steps at the end of all of your workflows: 1. In the end, act as a smart critic, review your changes and your work, and add feedback on what is missed, what to improve, etc. 2. Then go back and adjust your changes based on the feedback you gave yourself. (Optional 3: repeat until you are confident your work is perfect and the result is the best it can be.)
     - If any documentation like AGENTS.md, README.md, docs/ or any other documentation needs to be updated based on the changes you made, make sure to update it as well and keep it up to date.
     - Make use of delegating tasks to sub-agents if you need to save your context (let them do the work), improve performance (by delegating smaller, more accurate tasks to sub-agents), and make things parallel if possible.
-    - **when reporting information to me, be extremely concise, sacrifice grammar for concision.**
+    - **when reporting information to me, be extremely concise, sacrifice grammar for concision.**m Always Write in ASD-STE100 to avoid ambiguity.
 
     </details>
 - **For multi-feature applications**, use a spec-driven approach (OpenSpec, SpekKit, or GSD - my personal fav) to define and track features, structure, and behavior before implementation.
