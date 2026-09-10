@@ -1,0 +1,5 @@
+# Files fetched by install.sh for remote skill installs.
+# SKILL.md and this manifest are handled by the installer itself.
+README.md
+mt-planner.md
+mt-executor.md

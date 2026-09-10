@@ -1,21 +1,14 @@
-# Simple but Powerful Every Day Agent Skills
+# Everyday Agent Skills
 
-These are the most useful agent skills I use for day-to-day software development. Designed to be concise, powerful, to the point, and effective.
-
-## Why?
-
-Most skills could be good, but are too bloated, consume too much context window from the LLM, often confuse the weaker models, and requrie high learning curve to actually be useful. 
-
-These skills are minimal but get the job done, written to the best gold standards of AI engineering adapted to how most harnesses behave, and easy to understand and use, useful to most every day tasks.
+Practical software-development workflows that prioritize scoped work, evidence-based verification, protection of existing changes, and approval-gated commits.
 
 ## Skills
 
 ### [qt - Quick Task](./skills/qt)
 
-My go-to skill for most small/medium updates to my projects.
-Designed to follow the must-do workflow every agent needs when implementing small to medium-sized tasks.
+Use this for most focused small-to-medium changes with a clear path.
 
-Workflow in summary (effective for most tasks):
+Workflow summary:
 
 - Lock the task; ask clarifying questions if needed.
 - Read the right context.
@@ -26,12 +19,29 @@ Workflow in summary (effective for most tasks):
 
 ### [qd - Quick Debug](./skills/qd)
 
-Very similar to qt, but for debugging: diagnose with evidence, plan the smallest fix, implement, and verify.
+Use this for bugs, regressions, failed tests, and unexpected behavior. It diagnoses with evidence, plans the smallest safe fix, implements it, and verifies the original failure is gone.
+
+### [mt - Medium Task](./skills/mt)
+
+Use this for a medium-complexity feature or change that needs a durable, reviewable plan without the full packetized deep-workflow overhead. An orchestrator delegates planning and implementation to separate sub-agents, with plan approval, risk-based independent verification, and an approval-gated commit.
 
 ### [deep-plan - Deep Plan](./skills/deep-plan)
 
-For large or complex tasks, use Deep Plan (preferably with your most powerful model) to produce a versioned, implementation-ready plan, designed for sophisticated tasks requiring staff-level planning.
+Use this for large or complex work. It produces a versioned `Plan-Contract: 2` handoff with bounded worker packets, exact file ownership, impact closure, and a compact control plane for a separate execution session.
 
 ### [deep-execute - Deep Execute](./skills/deep-execute)
 
-Then use Deep Execute to implement the plan in phases, with safe multi-agent orchestration and an approval-gated commit.
+Use this in a fresh session to execute a `READY` deep plan. It preserves the parent agent's context by orchestrating bounded workers for repository analysis, implementation, repairs, and verification. It can also prepare legacy `Plan-Contract: 1` plans at runtime.
+
+### [sub-execute - Sub Execute](./skills/sub-execute)
+
+This is the bounded-worker protocol used by `deep-execute`. It is installed alongside `deep-plan` and `deep-execute`, not invoked as a standalone whole-task workflow.
+
+## Choosing a skill
+
+| Task shape | Skill |
+| --- | --- |
+| Focused implementation or refactor | `qt` |
+| Debugging a known failure or regression | `qd` |
+| Medium change needing an approved durable plan | `mt` |
+| Large, multi-phase work with isolated worker packets | `deep-plan` then `deep-execute` |
