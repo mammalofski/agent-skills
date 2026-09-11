@@ -1,5 +1,7 @@
 # Medium Task (`mt`)
 
+> **Beta:** this skill is under development and not yet perfect. For now, I recommend using [`gsd-quick`](https://github.com/open-gsd/gsd-core/tree/next/skills/gsd-quick) instead.
+
 ## Purpose
 
 `mt` runs one medium-complexity task through an orchestrated **plan, approve, execute, verify, commit** loop. The main agent orchestrates only: a planner sub-agent writes a durable plan, the user approves it, and a separate executor sub-agent implements and verifies it.
