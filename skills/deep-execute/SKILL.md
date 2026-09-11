@@ -1,6 +1,6 @@
 ---
 name: deep-execute
-description: Deep Execute = Orchestrate a READY plan through context-isolated sub-execute workers and verified completion. Use when a plan exists under .planning/navoid-plans/<slug>/plan.md and the main agent must preserve its context by delegating all repository inspection, implementation, tests, repairs, and review while retaining orchestration, safety, journal, and approval-gated commit duties.
+description: Deep Execute = Orchestrate a READY plan through context-isolated sub-execute workers and verified completion. Use when a plan exists under .planning/navoid-plans/<feature-slug>/plan.md and the main agent must preserve its context by delegating all repository inspection, implementation, tests, repairs, and review while retaining orchestration, safety, journal, and approval-gated commit duties.
 ---
 
 # Deep Execute
@@ -36,7 +36,7 @@ Small reads and writes of plan artifacts, lock metadata, journal, worker summari
 
 ## Protocol
 
-- Plan directory: `.planning/navoid-plans/<slug>/`
+- Feature workspace and plan directory: `.planning/navoid-plans/<feature-slug>/`
 - Compact control plane: `orchestrator.md`
 - Supported plans:
   - preferred: `Plan-Contract: 2` with `packets.md`;
@@ -48,6 +48,7 @@ Small reads and writes of plan artifacts, lock metadata, journal, worker summari
 - Runtime control packages for legacy plans: `runtime/<prepare-attempt-id>/`
 - Active-run lock: `.execution.lock/`
 - Execution states: `IN_PROGRESS`, `BLOCKED`, `VERIFIED`, `COMPLETED`
+- Every feature artifact this workflow reads or writes belongs in the selected feature workspace. Reuse the plan's `<feature-slug>`; do not create journals, results, runtime packages, locks, or reports elsewhere.
 
 ## Context-preservation policy
 
@@ -67,7 +68,7 @@ Small reads and writes of plan artifacts, lock metadata, journal, worker summari
 
 - Read applicable project instructions before plan-provided commands.
 - Resolve an explicit plan path. Without one, proceed only when exactly one supported `READY` plan exists; otherwise ask the user.
-- Confirm the plan is inside the current repository.
+- Confirm the plan is exactly `.planning/navoid-plans/<feature-slug>/plan.md` inside the current repository, and resolve every package artifact path beneath that same feature workspace.
 - Use targeted reads to validate `plan.md` frontmatter, status, contract, and package paths. Do not load its detailed body into main context.
 - Require `Status: READY` and either `Plan-Contract: 1` or `Plan-Contract: 2`.
 - For Contract 2 only, read the compact `orchestrator.md` and require `Orchestrator-Contract: 1`, `Status: READY`, `Plan status: READY`, `Open questions: none`, and a bounded control-plane size.

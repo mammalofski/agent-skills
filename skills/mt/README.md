@@ -17,14 +17,14 @@ It is the middle weight between `qt` and the `deep-plan` + `deep-execute` pair.
 ## Where the plan lives
 
 ```text
-.planning/navoid-plans/<slug>/
+.planning/navoid-plans/<feature-slug>/
 ├── plan.md                     # MT-Plan-Contract 1, DRAFT then READY, immutable once READY
 ├── execution-report.md         # MT-Result-Contract 1 implementation evidence
 ├── execution-report-fix-<n>.md # Fix-round evidence, never overwritten
 └── verification-report.md      # Independent read-only review evidence
 ```
 
-The directory is shared with the `deep-plan` skill but the contract differs, so an `mt` plan is not a `/deep-execute` package. The plan is written to be sufficient on its own: approve it and continue in the same session, or hand `plan.md` to a fresh session.
+The directory is the feature's shared working ground: all `mt` plans and reports remain in `.planning/navoid-plans/<feature-slug>/`. It is shared with the `deep-plan` skill but the contract differs, so an `mt` plan is not a `/deep-execute` package. The plan is written to be sufficient on its own: approve it and continue in the same session, or hand `plan.md` to a fresh session.
 
 ## Starting mode
 

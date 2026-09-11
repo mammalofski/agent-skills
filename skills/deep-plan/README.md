@@ -7,7 +7,7 @@
 ## Artifact protocol
 
 ```text
-.planning/navoid-plans/<slug>/
+.planning/navoid-plans/<feature-slug>/
 ├── plan.md               # Detailed immutable Plan-Contract 2
 ├── orchestrator.md       # Compact control plane for execute
 ├── packets.md            # Packet graph and index
@@ -15,7 +15,7 @@
 └── package.sha256        # Immutable package checksums
 ```
 
-Optional supporting artifacts are checksummed and indexed. `execution.md`, `results/`, and `.execution.lock/` are reserved for execution.
+Optional supporting artifacts are checksummed and indexed. All feature artifacts stay in this shared workspace; `execution.md`, `results/`, and `.execution.lock/` are reserved for execution.
 
 ## Workflow summary
 
@@ -47,7 +47,7 @@ Optional supporting artifacts are checksummed and indexed. `execution.md`, `resu
 Start a fresh session with:
 
 ```text
-/deep-execute .planning/navoid-plans/<slug>/plan.md
+/deep-execute .planning/navoid-plans/<feature-slug>/plan.md
 ```
 
 Install `deep-plan`, `deep-execute`, and `sub-execute` together for the complete workflow.

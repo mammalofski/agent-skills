@@ -7,7 +7,7 @@
 ## Artifact protocol
 
 ```text
-.planning/navoid-plans/<slug>/
+.planning/navoid-plans/<feature-slug>/
 ├── plan.md             # Immutable READY plan
 ├── orchestrator.md     # Compact executor control plane
 ├── packets.md          # Packet graph and index
@@ -46,7 +46,7 @@
 ## Invocation
 
 ```text
-/deep-execute .planning/navoid-plans/<slug>/plan.md
+/deep-execute .planning/navoid-plans/<feature-slug>/plan.md
 ```
 
 `sub-execute` must be installed and available to spawned workers.

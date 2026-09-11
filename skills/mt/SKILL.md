@@ -1,6 +1,6 @@
 ---
 name: mt
-description: Orchestrates planning and implementation for medium-complexity features and changes. Use when a task needs a durable plan in .planning/navoid-plans/{slug}/plan.md, an explicit plan-approval gate, and separate planner and executor sub-agents. Heavier planning than qt, lighter than deep-plan plus deep-execute.
+description: Orchestrates planning and implementation for medium-complexity features and changes. Use when a task needs a durable plan in .planning/navoid-plans/<feature-slug>/plan.md, an explicit plan-approval gate, and separate planner and executor sub-agents. Heavier planning than qt, lighter than deep-plan plus deep-execute.
 ---
 
 <objective>
@@ -46,7 +46,7 @@ Reading `plan.md`, report headers, git status/stat metadata, and writing the com
 
 <artifacts>
 
-Plan package directory: `.planning/navoid-plans/{slug}/`
+Feature workspace and plan package directory: `.planning/navoid-plans/<feature-slug>/`
 
 | Artifact | Owner | Purpose |
 | --- | --- | --- |
@@ -57,10 +57,11 @@ Plan package directory: `.planning/navoid-plans/{slug}/`
 
 Rules:
 
-- A `READY` plan is immutable. Material change requires a new suffixed package, for example `{slug}-2`.
-- The directory is shared with the `deep-plan` skill. If `{slug}/` already holds a `Plan-Contract:` package, use `{slug}-mt`. Never overwrite another package.
+- A `READY` plan is immutable. Material change requires a new suffixed package, for example `<feature-slug>-2`.
+- The directory is shared with the `deep-plan` skill. If `<feature-slug>/` already holds a `Plan-Contract:` package, use `<feature-slug>-mt`. Never overwrite another package.
 - An `mt` plan is **not** a `/deep-execute` package. It has no `orchestrator.md`, `packets.md`, assignments, or checksums, and `/deep-execute` will reject it.
 - Do not stage `.planning/` unless the user explicitly asks for it.
+- Keep every feature artifact used or written by this workflow in the selected feature workspace. The planner and executor report paths must be descendants of that directory; reject a dispatch that points them elsewhere.
 </artifacts>
 
 <subagent_protocol_files>
@@ -97,6 +98,7 @@ Branch: {branch}
 HEAD: {sha}
 Plan-Directory: {absolute-path}
 Plan-Path: {absolute-plan-path}
+Feature-Input-Artifacts: {absolute-initial-specs-and-final-specs-paths-or-none}
 Protected-Pre-Existing-Changes: {paths-or-none}
 Host-Planning-Mode: {read-only-planning-or-normal}
 User-Decisions: {decisions-already-given-or-none}
@@ -148,7 +150,7 @@ Return: at most 8 bullets / about 300 words using the executor return contract.
    - If the user switches modes mid-run, re-detect before the next gate and use that mode's gate form.
 5. Confirm sub-agent delegation is available. If it is not, disclose that `mt` cannot enforce its planner/executor separation on this host, and continue in single-session compatibility mode only after explicit user approval: read `mt-planner.md` and then `mt-executor.md` and follow them yourself in sequence, still producing `plan.md` and still running both gates.
 6. Record repository root, branch, `HEAD`, and pre-existing staged, unstaged, and untracked paths. Treat all pre-existing changes as user-owned and protected. Never clean, revert, or stage them.
-7. Derive a lowercase hyphenated slug of at most 45 characters and resolve the plan directory.
+7. Inspect the relevant `.planning/navoid-plans/` artifacts for `initial-specs.md` or `final-specs.md`; when one defines this feature, reuse its feature slug and include it as planner input. Otherwise derive a lowercase hyphenated feature slug of at most 45 characters. Resolve `.planning/navoid-plans/<feature-slug>/` as the plan directory.
 8. Open a todo list covering plan, gate, execute, verify, satisfaction, commit.
 </phase_0>
 

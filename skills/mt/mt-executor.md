@@ -34,6 +34,7 @@ A `fix` dispatch may arrive as a fresh sub-agent or as a resumed continuation of
 ### 1. Validate the dispatch and plan
 
 - Confirm mode, repository root, branch, `HEAD`, plan path, report path, protected paths, and approval statement.
+- Require `Plan-Path` to be `.planning/navoid-plans/<feature-slug>/plan.md` under the repository root and `Report-Path` to be a new file inside that same feature workspace. Otherwise stop with `BLOCKED: invalid-artifact-path`.
 - Read `plan.md` in full. Require `MT-Plan-Contract: 1` and `Status: READY`.
 - Confirm branch and `HEAD` match the plan baseline. On drift, stop with `BLOCKED: baseline-drift` and name the difference.
 - Confirm `Report-Path` is unique and does not overwrite an existing report.

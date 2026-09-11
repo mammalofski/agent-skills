@@ -11,7 +11,7 @@ This is the planning half of the `deep-plan` + `deep-execute` workflow. It expan
 
 ## Handoff protocol
 
-- Plan directory: `.planning/navoid-plans/<slug>/`
+- Feature workspace and plan directory: `.planning/navoid-plans/<feature-slug>/`
 - Required immutable plan: `plan.md`
 - Required compact control plane: `orchestrator.md`
 - Required worker index: `packets.md`
@@ -26,6 +26,7 @@ This is the planning half of the `deep-plan` + `deep-execute` workflow. It expan
 - Assignment contract: `Sub-Execute-Assignment: 1`
 - Plan lifecycle: write `DRAFT`, validate the complete package, then promote to `READY`
 - A `READY` plan package is immutable. Material changes require a new suffixed package.
+- Every feature artifact this workflow reads or writes belongs in the selected feature workspace. Keep the same `<feature-slug>` used by preceding specification artifacts; do not create planning artifacts elsewhere.
 
 ## Non-negotiable principles
 
@@ -68,7 +69,8 @@ Keep exactly one planning item in progress while work remains.
 - Restate the requirement, expected output, constraints, explicit non-goals, and objective done condition.
 - Record repository root, branch, `HEAD`, and pre-existing staged, unstaged, and untracked changes separately. Never modify or clean them.
 - Require execution on the recorded branch unless the user explicitly approves reconciliation.
-- Derive a lowercase hyphenated slug, at most about 45 characters.
+- Before deriving a slug, inspect the relevant `.planning/navoid-plans/` artifacts for `initial-specs.md` or `final-specs.md` that define this feature. Reuse that feature's slug and use those artifacts as product input when present.
+- Otherwise derive a lowercase hyphenated feature slug, at most about 45 characters.
 - Never overwrite an existing plan directory implicitly. Use a clear suffixed slug unless an exact revision was authorized.
 
 ### 2. Harden product and engineering intent

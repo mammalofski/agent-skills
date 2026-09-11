@@ -19,4 +19,4 @@ Brain dump: Customers should be able to save a report and share it with their te
 Read the repository and produce the feature specification.
 ```
 
-The skill investigates relevant repository context, identifies the current specification/implementation status, saves the canonical result to `.planning/navoid-plans/<slug>/initial-specs.md`, and returns a compact Markdown document with scope, requirements, acceptance criteria, and only material open decisions.
+The skill investigates relevant repository context, identifies the current specification/implementation status, saves the canonical result to `.planning/navoid-plans/<feature-slug>/initial-specs.md`, and returns a compact Markdown document with scope, requirements, acceptance criteria, and only material open decisions.

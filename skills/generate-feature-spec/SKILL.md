@@ -26,9 +26,12 @@ When given pasted text or a document, read it fully, inspect the relevant reposi
 </workflow>
 
 <artifact_persistence>
-The canonical output path is `.planning/navoid-plans/slug/initial-specs.md`, relative to the repository root; `slug` is a placeholder for the derived feature slug.
+The feature workspace is `.planning/navoid-plans/<feature-slug>/`, relative to the repository root. It is the shared working ground for every feature artifact produced or consumed by `generate-feature-spec`, `discuss-gray-areas`, `mt`, `deep-plan`, and `deep-execute`.
+
+The canonical output path is `.planning/navoid-plans/<feature-slug>/initial-specs.md`; `<feature-slug>` is the derived feature slug.
 
 - Use a user-provided slug when one is explicitly supplied. Otherwise derive one from the feature name by lowercasing it, replacing each run of non-alphanumeric characters with a hyphen, collapsing repeated hyphens, and trimming hyphens.
+- Once selected, retain the same `<feature-slug>` for all artifacts of this feature. Do not write feature artifacts outside its feature workspace.
 - Read an existing target file before writing. Treat it as part of the existing specification status; reconcile it with the new source and repository evidence, retaining still-valid decisions and surfacing meaningful changes.
 - Create the target directory when needed and write the complete final Markdown document to `initial-specs.md` using the repository's normal file-editing mechanism.
 - In the final response, identify the saved artifact path and also provide the document inline unless the user explicitly asks for file-only output.

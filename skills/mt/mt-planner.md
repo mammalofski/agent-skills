@@ -40,7 +40,8 @@ Do not:
 
 ### 1. Validate the dispatch
 
-- Confirm repository root, branch, `HEAD`, `Plan-Directory`, `Plan-Path`, protected pre-existing paths, host planning mode, and round.
+- Confirm repository root, branch, `HEAD`, `Plan-Directory`, `Plan-Path`, `Feature-Input-Artifacts`, protected pre-existing paths, host planning mode, and round.
+- Require `Plan-Directory` to be `.planning/navoid-plans/<feature-slug>/` under the repository root and `Plan-Path` to be that directory's `plan.md`. Return `BLOCKED: invalid-artifact-path` if either path is outside the feature workspace.
 - Confirm the branch and `HEAD` match the dispatch. Report drift instead of planning around it.
 - If `Plan-Path` already holds a `Status: READY` plan and your round is not `revision-N` or `persist`, stop and return `BLOCKED: plan-exists`.
 - For `Round: answers-N`, apply the user answers and revise only what they change.
@@ -61,6 +62,7 @@ Cover: lock task, analyze, resolve gray areas, select approach, write steps, des
 ### 4. Lock the task and baseline
 
 - Restate the requirement, expected output, constraints, explicit non-goals, and an objective done condition.
+- Read the dispatched `Feature-Input-Artifacts` plus any `initial-specs.md` and `final-specs.md` in `Plan-Directory`; treat the final specification as the current product contract and preserve its requirements in the plan.
 - Record repository root, branch, `HEAD`, and the protected pre-existing paths verbatim in the plan.
 - Define stable requirement IDs: `FR-*` for functional, `NFR-*` for non-functional, `AC-*` for acceptance.
 

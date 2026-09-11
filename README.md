@@ -41,6 +41,10 @@ This is the bounded-worker protocol used by `deep-execute`. It is installed alon
 
 Use this to turn a product brain dump or source document into a concise, repository-grounded feature specification. It saves the canonical result to `.planning/navoid-plans/<slug>/initial-specs.md` and captures existing-state context, product requirements, testable acceptance criteria, and only the open decisions that block implementation.
 
+### [discuss-gray-areas](./skills/discuss-gray-areas)
+
+Use this after `generate-feature-spec` to investigate the relevant repository, resolve every material product or functional ambiguity with the user, and produce `.planning/navoid-plans/<slug>/discussed-gray-areas.md` plus the canonical merged `.planning/navoid-plans/<slug>/final-specs.md`.
+
 ## Choosing a skill
 
 | Task shape | Skill |
@@ -50,3 +54,4 @@ Use this to turn a product brain dump or source document into a concise, reposit
 | Medium change needing an approved durable plan | `mt` |
 | Large, multi-phase work with isolated worker packets | `deep-plan` then `deep-execute` |
 | Product brain dump needing a build-ready definition | `generate-feature-spec` |
+| Feature specification needing product-decision closure before implementation | `discuss-gray-areas` |
