@@ -1,7 +1,5 @@
 # Medium Task (`mt`)
 
-> **Beta:** this skill is under development and not yet perfect. For now, I recommend using [`gsd-quick`](https://github.com/open-gsd/gsd-core/tree/next/skills/gsd-quick) instead.
-
 ## Purpose
 
 `mt` runs one medium-complexity task through an orchestrated **plan, approve, execute, verify, commit** loop. The main agent orchestrates only: a planner sub-agent writes a durable plan, the user approves it, and a separate executor sub-agent implements and verifies it.
@@ -18,7 +16,7 @@ It is the middle weight between `qt` and the `deep-plan` + `deep-execute` pair.
 
 ```text
 .planning/navoid-plans/<feature-slug>/
-├── plan.md                     # MT-Plan-Contract 1, DRAFT then READY, immutable once READY
+├── plan.md                     # MT-Plan-Contract 1: DRAFT, REVIEW, then immutable READY
 ├── execution-report.md         # MT-Result-Contract 1 implementation evidence
 ├── execution-report-fix-<n>.md # Fix-round evidence, never overwritten
 └── verification-report.md      # Independent read-only review evidence
@@ -35,10 +33,10 @@ Start `mt` in either interaction mode; both are first-class and no mode switch i
 
 ## Workflow summary
 
-1. Lock the task, confirm `mt` is the right weight, record the git baseline, and protect pre-existing user changes.
+1. Lock the task, record the git baseline, and protect pre-existing user changes.
 2. Dispatch the planner sub-agent; route its plan-shaping questions to the user and resume it with the answers.
 3. Review the plan against the gate checklist, send findings back to the planner, and get explicit approval to implement.
-4. Leave planning mode, persist the plan if the host blocked artifact writes, and confirm it is `READY` on disk.
+4. Promote the approved `REVIEW` plan to immutable `READY`; persist it only after approval if the host blocked artifact writes.
 5. Dispatch the executor sub-agent to implement the plan, run its checks, and write an evidence report.
 6. Dispatch an independent read-only verifier only when a risk trigger fires, then repair findings within the round limit.
 7. Ask whether everything is good. Every reported bug or requested change becomes a `USER-<n>` fix round, handled by resuming the executor that did the work or by dispatching a fresh one, then re-verified and brought back to the same question.

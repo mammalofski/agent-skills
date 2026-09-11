@@ -1,123 +1,77 @@
 ---
 name: mt
-description: Orchestrates planning and implementation for medium-complexity features and changes. Use when a task needs a durable plan in .planning/navoid-plans/<feature-slug>/plan.md, an explicit plan-approval gate, and separate planner and executor sub-agents. Heavier planning than qt, lighter than deep-plan plus deep-execute.
+description: Orchestrates medium-complexity changes with a durable plan in .planning/navoid-plans, explicit plan approval, and separate planner and executor sub-agents. Use for work that needs more structure than qt but not the multi-worker deep-plan and deep-execute workflow.
 ---
 
 <objective>
-You are the `mt` orchestrator. Run one medium-complexity task through **plan, approve, execute, verify, commit** while delegating the deep work to two bounded sub-agents.
+Run the requested medium task through one bounded sequence: plan, review, approve, execute, verify, satisfy the user, and commit. The orchestrator coordinates; a planner owns the plan and a separate executor owns implementation.
 </objective>
 
 <quick_start>
-`mt` sits between `qt` and the `deep-plan` + `deep-execute` pair:
-
-| Skill | Use when | Shape |
-| --- | --- | --- |
-| `qt` | Focused change, clear path, one session | Single agent does everything |
-| `mt` | Medium feature or change worth a durable, reviewable plan | Orchestrator + planner sub-agent + executor sub-agent |
-| `deep-plan` + `deep-execute` | Large multi-phase work needing packets, parallel workers, locks, traceability | Separate sessions, many workers |
-
-If the task is trivial or a narrow bug fix, recommend `qt` or `qd` instead. If it needs multiple parallel workers, packet ownership, or cross-session locking, recommend `deep-plan` + `deep-execute`. Say so once, then follow the user's choice.
+Follow the eight workflow steps in order whenever `mt` is invoked.
 </quick_start>
 
-<role_boundary>
+<essential_constraints>
 
-<orchestrator_responsibilities>
+- Start this workflow when `mt` is invoked; do not reclassify the task or redirect to another skill.
+- Keep all artifacts in `.planning/navoid-plans/<slug>/`: `plan.md`, `execution-report.md`, unique `execution-report-fix-<n>.md` files, and `verification-report.md`.
+- The plan lifecycle is `DRAFT` → `REVIEW` → `READY`. Only `READY` is immutable and executable. The planner owns every plan edit and promotion.
+- The orchestrator never edits plans, source, tests, configuration, or generated files, and never runs implementation validators. Its sole write exception is copying a write-blocked planner's complete, approved plan verbatim when that planner cannot resume. It may read artifact headers, plan content, reports, `git status --porcelain`, and `git diff --stat`.
+- Use distinct planner and executor identities. Resume an agent only within its original role for answers, plan revisions, artifact persistence, or scoped fixes; never let the planner implement.
+- When resumption is unavailable, stale, blocked, or unsuitable for the touched code, dispatch a fresh same-role agent with the plan and relevant report or evidence paths.
+- Protect all pre-existing staged, unstaged, and untracked user changes. Neither sub-agent may stage, commit, push, switch branches, clean, reset, stash, or delete untracked files.
+- Never dispatch implementation before current-session approval. Never commit without the user's explicit current-session approval, and never push, merge, deploy, or delete artifacts without a separate request.
+- Keep detailed evidence in artifacts and sub-agent returns compact.
+</essential_constraints>
 
-- classify the task and confirm `mt` is the right weight;
-- run repository preflight and record the baseline;
-- dispatch the planner sub-agent and route plan questions to the user;
-- review the plan against the gate checklist and run the approval gate;
-- move the session from planning to execution after approval, then dispatch the executor sub-agent;
-- decide whether an independent verification pass is required;
-- run the satisfaction gate, and route every user-reported bug or change request into a further executor round;
-- create the approved commit and report the outcome.
-</orchestrator_responsibilities>
+<protocols>
 
-<orchestrator_exclusions>
+Resolve the directory containing this file and pass absolute paths to these required protocols:
 
-- author or edit plan content;
-- edit source, tests, config, schemas, or generated files;
-- run implementation, test, build, or lint commands;
-- read source files, full diffs, or full logs into its context.
-</orchestrator_exclusions>
-
-Reading `plan.md`, report headers, git status/stat metadata, and writing the commit message are orchestration, not implementation.
-</role_boundary>
-
-<artifacts>
-
-Feature workspace and plan package directory: `.planning/navoid-plans/<feature-slug>/`
-
-| Artifact | Owner | Purpose |
+| Role | File | Use |
 | --- | --- | --- |
-| `plan.md` | planner | Comprehensive plan, `MT-Plan-Contract: 1`, `DRAFT` then `READY`, immutable once `READY` |
-| `execution-report.md` | executor | Implementation evidence, `MT-Result-Contract: 1` |
-| `execution-report-fix-{n}.md` | executor | Fix-round evidence; never overwrites a prior report |
-| `verification-report.md` | verifier | Independent read-only review evidence; suffix extra passes, for example `verification-report-staged.md` |
+| Planner | `mt-planner.md` | Research, resolve material questions, write and revise the plan. |
+| Executor | `mt-executor.md` | Implement, fix, or independently verify an approved plan. |
 
-Rules:
+If a protocol is missing, stop and report an incomplete `mt` installation; do not improvise a replacement.
+</protocols>
 
-- A `READY` plan is immutable. Material change requires a new suffixed package, for example `<feature-slug>-2`.
-- The directory is shared with the `deep-plan` skill. If `<feature-slug>/` already holds a `Plan-Contract:` package, use `<feature-slug>-mt`. Never overwrite another package.
-- An `mt` plan is **not** a `/deep-execute` package. It has no `orchestrator.md`, `packets.md`, assignments, or checksums, and `/deep-execute` will reject it.
-- Do not stage `.planning/` unless the user explicitly asks for it.
-- Keep every feature artifact used or written by this workflow in the selected feature workspace. The planner and executor report paths must be descendants of that directory; reject a dispatch that points them elsewhere.
-</artifacts>
+<dispatch_contracts>
 
-<subagent_protocol_files>
+Never paste plan bodies, source, diffs, or logs into a dispatch; pass paths instead. Every sub-agent must read its protocol before acting and must not talk directly to the user.
 
-Both protocols ship inside this skill directory. Resolve the directory containing this `SKILL.md` and pass absolute paths.
-
-| File | Used by | Contract |
-| --- | --- | --- |
-| `mt-planner.md` | planner sub-agent | Analyze, resolve gray areas, write and self-review the plan |
-| `mt-executor.md` | executor sub-agent | `implement`, `fix`, and read-only `verify` modes |
-
-If either file is missing, stop and tell the user the `mt` skill is installed incompletely; do not improvise a replacement protocol.
-</subagent_protocol_files>
-
-<dispatch_mechanics>
-
-- Use a fresh sub-agent per dispatch. Do not reuse one agent for both planning and execution.
-- Sub-agent type: a general-purpose read/write agent for planner, executor, and fix dispatches; a read-only agent for `verify` when the host offers one. Prefer repository-defined planner/implementer/reviewer agents when they exist.
-- Suggested effort: high for the planner, medium to high for the executor.
-- Never paste plan content, source, diffs, or logs into a dispatch prompt. Pass paths.
-- Every dispatch prompt must tell the sub-agent to read its protocol file first.
-- Sub-agents never talk to the user. They return questions and blockers to you.
-- Resume the same planner session for question answers, revision rounds, and artifact persistence when the host supports resuming a sub-agent; otherwise dispatch a fresh planner with the prior plan path plus the new input.
-- Resume the executor that did the work for follow-up fixes and user-requested changes when the host supports resuming: it already holds the plan and the implementation context. Dispatch a fresh executor instead when resuming is unavailable, the prior executor ended `BLOCKED`, its context is stale or exhausted, or the new work touches code it never loaded. A fresh executor gets the plan path, prior report paths, and the exact findings or requested changes; it never gets a replay of the conversation.
-
-<planner_dispatch_prompt>
+<planner_dispatch>
 
 ```markdown
-Read `{skill-dir}/mt-planner.md` in full and follow it exactly. You are the mt planner sub-agent.
+Read `{skill-dir}/mt-planner.md` in full and follow it exactly. You are the mt planner.
 
-Task (verbatim): {user-task}
+Task: {verbatim-user-task}
 Repository-Root: {absolute-path}
 Branch: {branch}
 HEAD: {sha}
 Plan-Directory: {absolute-path}
-Plan-Path: {absolute-plan-path}
-Feature-Input-Artifacts: {absolute-initial-specs-and-final-specs-paths-or-none}
+Plan-Path: {absolute-path}
+Feature-Input-Artifacts: {paths-or-none}
 Protected-Pre-Existing-Changes: {paths-or-none}
-Host-Planning-Mode: {read-only-planning-or-normal}
-User-Decisions: {decisions-already-given-or-none}
-Constraints: {repository-or-user-constraints-or-none}
-Round: {1-or-answers-N-or-revision-N-or-persist}
-User-Answers: {answers-to-previous-questions-or-none}
-Orchestrator-Findings: {gate-findings-to-fix-or-none}
+Host-Planning-Mode: {normal-or-write-blocked}
+User-Decisions: {decisions-or-none}
+Constraints: {constraints-or-none}
+Round: {plan|answers-N|revision-N|promote|persist}
+User-Answers: {answers-or-none}
+Orchestrator-Findings: {findings-or-none}
+Persistence-Fallback: {resume-available|return-complete-plan-body-if-write-blocked}
 
-Boundaries: plan artifacts only; no source, test, config, or generated-file edits; no staging, commit, push, branch switch, cleanup, or deletion; do not ask the user directly; do not modify pre-existing user changes.
-Return: at most 10 bullets / about 350 words using the planner return contract.
+Boundaries: plan artifacts only; no implementation, git mutation, cleanup, deletion, or direct user questions.
+Return: the planner return contract, at most 10 bullets / about 350 words.
 ```
-</planner_dispatch_prompt>
+</planner_dispatch>
 
-<executor_dispatch_prompt>
+<executor_dispatch>
 
 ```markdown
-Read `{skill-dir}/mt-executor.md` in full and follow it exactly. You are the mt executor sub-agent.
+Read `{skill-dir}/mt-executor.md` in full and follow it exactly. You are the mt executor.
 
-Mode: {implement-or-fix-or-verify}
+Mode: {implement|fix|verify}
 Repository-Root: {absolute-path}
 Branch: {branch}
 HEAD: {sha}
@@ -125,168 +79,102 @@ Plan-Path: {absolute-ready-plan-path}
 Report-Path: {absolute-unique-report-path}
 Protected-Pre-Existing-Changes: {paths-or-none}
 Approval: user approved this plan for implementation in the current session
-Validators: {commands-or-use-the-plan-verification-section}
-Finding-IDs: {fix-or-verify-only-else-none}
-Evidence-Paths: {fix-or-verify-only-else-none}
-Requested-Changes: {fix-only-USER-n-IDs-and-verbatim-requests-or-none}
-Prior-Reports: {fix-or-verify-only-earlier-report-paths-or-none}
+Validators: {commands-or-use-plan-verification-section}
+Finding-IDs: {IDs-or-none}
+Evidence-Paths: {paths-or-none}
+Requested-Changes: {USER-IDs-and-verbatim-requests-or-none}
+Prior-Reports: {paths-or-none}
 
-Boundaries: do only what the plan, the named findings, or the listed requested changes require; no staging, commit, push, branch switch, cleanup, or untracked deletion; do not modify plan.md or another agent's report; no nested delegation; stop and report material deviations.
-Return: at most 8 bullets / about 300 words using the executor return contract.
+Boundaries: do only planned or named work; no plan/report overwrite, nested delegation, git mutation, cleanup, or deletion. Report material deviations.
+Return: the executor return contract, at most 8 bullets / about 300 words.
 ```
-</executor_dispatch_prompt>
-</dispatch_mechanics>
+</executor_dispatch>
+</dispatch_contracts>
 
 <workflow>
 
-<phase_0 name="lock_task_and_baseline">
+<step number="1" name="preflight">
 
-1. Read applicable project instructions first.
-2. Restate the requirement, expected output, constraints, and done condition in a few bullets.
-3. Confirm `mt` is the right weight. Recommend `qt`, `qd`, or `deep-plan` + `deep-execute` when it is not.
-4. Detect the host interaction mode. Both entry points are first-class, so never ask the user to switch modes before starting:
-   - **Started in a planning mode** such as Factory Spec Mode or Claude plan mode: the session is read-only, so artifact writes may be blocked until the plan is approved. Approval at the plan gate is what moves the session into execution.
-   - **Started in normal agent mode**: plan artifacts are writable immediately, the plan gate is an explicit question instead of an exit-planning approval, and there is no mode to leave. Planning discipline is unchanged: still no implementation before approval.
-   - If the user switches modes mid-run, re-detect before the next gate and use that mode's gate form.
-5. Confirm sub-agent delegation is available. If it is not, disclose that `mt` cannot enforce its planner/executor separation on this host, and continue in single-session compatibility mode only after explicit user approval: read `mt-planner.md` and then `mt-executor.md` and follow them yourself in sequence, still producing `plan.md` and still running both gates.
-6. Record repository root, branch, `HEAD`, and pre-existing staged, unstaged, and untracked paths. Treat all pre-existing changes as user-owned and protected. Never clean, revert, or stage them.
-7. Inspect the relevant `.planning/navoid-plans/` artifacts for `initial-specs.md` or `final-specs.md`; when one defines this feature, reuse its feature slug and include it as planner input. Otherwise derive a lowercase hyphenated feature slug of at most 45 characters. Resolve `.planning/navoid-plans/<feature-slug>/` as the plan directory.
-8. Open a todo list covering plan, gate, execute, verify, satisfaction, commit.
-</phase_0>
+1. Read applicable project instructions.
+2. Record repository root, branch, `HEAD`, and pre-existing staged, unstaged, and untracked paths. Treat them as protected user work.
+3. Reuse the slug from relevant `initial-specs.md` or `final-specs.md`; otherwise derive a lowercase hyphenated slug of at most 45 characters. Set the plan directory to `.planning/navoid-plans/<slug>/`. If it contains a non-`mt` plan package, use `<slug>-mt` instead.
+4. Detect whether this host can write planning artifacts. Preserve write-blocked planning support; do not require a mode change before planning.
+5. Confirm delegation is available. If it is not, disclose that role separation cannot be enforced and continue in compatibility mode only with the user's explicit approval, following the planner protocol and then the executor protocol yourself.
+</step>
 
-<phase_1 name="delegate_planning">
+<step number="2" name="plan">
 
-1. Dispatch a fresh planner sub-agent with the planner prompt.
-2. Handle the planner return:
-   - `READY`: the plan file exists and is promoted. Continue to Phase 2.
-   - `NEEDS-INPUT`: ask the user the planner's exact questions with the host's native ask tool, batching up to four, then resume the planner with the answers. Allow at most two question rounds, then require the planner to proceed on documented assumptions.
-   - `WRITE-BLOCKED`: the planning mode prevented the artifact write. Keep the compact summary, continue to Phase 2, and persist the plan in Phase 3.
-   - `BLOCKED`: report the blocker and required decision to the user.
-3. Do not write plan content yourself. Send gaps back to the planner.
-</phase_1>
+Dispatch a fresh planner in `plan` round. Handle its return in sequence:
 
-<phase_2 name="plan_gate">
+- `NEEDS-INPUT`: ask up to four exact questions, resume the planner with answers, and allow at most two question rounds before documented assumptions are required.
+- `REVIEW`: continue to Step 3.
+- `WRITE-BLOCKED`: continue to Step 3 using the planner's compact plan summary and checklist attestation; preserve the planner session for Step 4.
+- `BLOCKED`: report the blocker and stop.
+</step>
 
-1. Read `plan.md` and check it against the gate checklist below. Do not read source files. If the write was blocked, run the checklist against the planner's return and ask the planner to confirm any item you cannot see.
-2. Send specific findings back to the planner for at most two revision rounds. If findings remain, present the best plan plus the open issues.
-3. Present the gate:
-   - In a planning mode, use the host's exit-planning approval with a compact summary: goal, approach, phase and step count, files to touch, verification commands, risks, and the plan path.
-   - In normal mode, ask explicitly for approval to implement.
-4. State that the plan is self-contained, so the user may approve and continue here or start a fresh session with the plan path.
-5. Never implement before approval. Requested plan changes go back to the planner and re-enter this gate.
+<step number="3" name="review_and_approve">
 
-<gate_checklist>
+1. If `plan.md` exists, require `MT-Plan-Contract: 1` and `Status: REVIEW`, then review it against the checklist below. Do not inspect source files.
+2. Send specific gaps to the planner in `revision-N` round. Allow at most two revision rounds. A planner revision remains `REVIEW`; it never mutates `READY`. If material gate gaps remain, report them and stop for a user decision.
+3. Present the user with the goal, approach, phase and step count, touched paths, verification commands, risks, and plan path. Ask explicitly for approval to implement.
+4. If the user requests plan changes, return them to the planner and repeat this step. Do not implement before approval.
 
-- Task contract, requirements, acceptance criteria, and non-goals are explicit.
-- Baseline branch, `HEAD`, and protected pre-existing paths are recorded.
-- Current behavior and affected surfaces are described from evidence.
-- The approach is the smallest complete one, with consequential alternatives noted.
-- Every step has What, Where with exact paths, How, Why, and Verify.
-- Tests, contracts, config, migrations, generated files, and required docs land in the right phase.
-- Verification lists focused checks and broader project validators with expected results.
-- Risks have prevention or recovery.
-- A staging allowlist candidate exists and excludes `.planning/`.
-- No open question could still change scope, behavior, or acceptance.
-- A fresh session could execute the plan without this conversation.
-</gate_checklist>
-</phase_2>
+<plan_gate_checklist>
 
-<phase_3 name="enter_execution_mode_and_persist_plan">
+- Requirements, acceptance criteria, non-goals, baseline, and protected paths are explicit.
+- Current behavior, affected surfaces, and consequential decisions are based on evidence.
+- Each step has What, Where, How, Why, Verify, and Expected; tests, contracts, configuration, migrations, generated files, and docs are accounted for.
+- Focused checks, broader validators, risks, recovery, staging allowlist, and fresh-session execution detail are present.
+- No unresolved question can change scope, behavior, or acceptance.
+</plan_gate_checklist>
+</step>
 
-1. If the session started in a planning mode, approval moves it into execution mode. Confirm implementation is now allowed before touching anything. If the session started in normal agent mode, there is nothing to leave; go straight to step 3.
-2. If `plan.md` was never written because the planning mode blocked it, resume the planner in `persist` mode to write it from its own context before any implementation. If resuming is impossible, have the planner return the complete plan body and write it verbatim without editing its content.
-3. Confirm `plan.md` exists with `Status: READY` before dispatching the executor. When the plan was persisted only now, re-check it against the gate checklist and spend at most one revision round on real gaps.
-</phase_3>
+<step number="4" name="persist_and_lock">
 
-<phase_4 name="delegate_execution">
+1. After approval, resume the planner in `promote` round to change the reviewed on-disk plan to `READY` without changing its content.
+2. If planning was write-blocked, resume the planner in `persist` round to write its retained, approved plan directly as `READY`. If resumption is unavailable, request the complete plan body from that planner and write it verbatim without changing it.
+3. Require a `READY` `plan.md` at the selected path before execution. Recheck only its artifact contract and baseline; a new finding now requires a new suffixed package, not an edit to the locked plan.
+</step>
 
-1. Dispatch a fresh executor sub-agent in `implement` mode with `Report-Path` set to `execution-report.md`.
-2. Consume only its compact return plus the report header. Use `git status --porcelain` and `git diff --stat` metadata for scope confirmation.
-3. Handle the return:
-   - `PASS`: continue to Phase 5.
-   - `REVISE` or failing checks: dispatch a fresh executor in `fix` mode with exact finding IDs, the prior report path as evidence, and `Report-Path` set to `execution-report-fix-{n}.md`. Allow at most two fix rounds per root cause.
-   - `BLOCKED: new-plan-required`: material change. Stop, report it, and offer a new suffixed plan package through Phase 1.
-   - `BLOCKED` for any other reason: report the blocker and the evidence path.
-</phase_4>
+<step number="5" name="execute">
 
-<phase_5 name="verification_decision">
+1. Dispatch a fresh executor in `implement` mode with `execution-report.md`.
+2. Consume its compact return and report header, then use `git status --porcelain` and `git diff --stat` only to confirm scope.
+3. On `PASS`, continue. On `REVISE` or a failing check, dispatch or resume that executor in `fix` mode with exact finding IDs, evidence paths, a new fix report path, and no more than two attempts per root cause. On `BLOCKED: new-plan-required`, report the material change and start a new suffixed package. On another `BLOCKED`, report the evidence and stop.
+</step>
 
-Executor self-verification is sufficient for ordinary changes. Otherwise dispatch a fresh sub-agent with the executor prompt, `Mode: verify`, `Report-Path` set to `verification-report.md`, and a read-only agent type when the host offers one. Do this when any trigger fires:
+<step number="6" name="independent_verification">
 
-- authentication, authorization, secrets, or other security-sensitive paths;
-- data migration, persistence, or destructive data handling;
-- money, pricing, billing, or regulatory logic;
-- concurrency, locking, or transactional behavior;
-- public API, schema, or other consumer-visible contract changes;
-- roughly eight or more changed files, or a large diff for the repository's norms;
-- shared or cross-cutting modules with wide blast radius;
-- the executor reported deviations, skipped checks, or unavailable validators;
-- the user asked for an independent review.
+Dispatch a fresh verifier in `verify` mode—read-only when the host supports it—when the change affects security, persistence or destructive data handling, money or regulation, concurrency, public contracts, broad or cross-cutting code, or when the executor reports deviations, skipped checks, unavailable validators, or the user requests review. Route findings into bounded executor fix rounds and re-verify; stop after two verification/fix rounds and report unresolved findings.
+</step>
 
-Route verifier findings into a bounded `fix` dispatch, then re-verify. Cap at two verify and fix rounds; report remaining findings to the user instead of looping.
-</phase_5>
+<step number="7" name="satisfaction_and_changes">
 
-<phase_6 name="satisfaction_gate_change_loop_and_commit">
+Ask exactly: **"Is everything good, and shall I move forward with the perfect commit?"**
 
-1. Ask exactly: **"Is everything good, and shall I move forward with the perfect commit?"**
-2. If the user reports a bug or asks for changes, classify the request:
-   - **Non-material**: a defect in what was implemented, a missed detail, or an adjustment that stays inside the plan's scope, contracts, and acceptance criteria. Handle it in this session with a change round.
-   - **Material**: a new requirement, a different approach, or a change to scope, contracts, architecture, data handling, security, or acceptance. Say so, then offer a new suffixed plan package through Phase 1. Never let an executor improvise a material change.
-3. Run a change round for non-material requests:
-   - Assign stable IDs `USER-1`, `USER-2`, and record each request in the user's own words. Ask a focused question when a request is ambiguous enough to be implemented two different ways.
-   - Resume the executor that did the work when the host supports it, sending only `Mode: fix`, the new IDs and verbatim requests, prior report paths, and a fresh `Report-Path`.
-   - Dispatch a fresh executor with `mt-executor.md`, the plan path, prior report paths, and the requested changes when resuming is unavailable or unsuitable.
-   - Never implement the request yourself, and never let it silently expand the plan.
-4. After each change round, re-run the Phase 5 verification decision. A user-visible defect always justifies at least the plan's focused checks plus the checks covering the changed behavior. Then return to step 1 of this phase.
-5. Repeat this loop for as long as the user keeps asking. User-requested rounds are not capped, but the two-attempt limit per root cause still holds: after two failed attempts at the same root cause, stop and report the blocker with evidence instead of retrying.
-6. If the commit is declined, stop cleanly and report the artifact paths.
-7. If approved:
-   - recheck `git status --porcelain`, branch, and `HEAD`;
-   - build the staging allowlist from executor-reported changed paths intersected with the plan's allowlist;
-   - exclude every pre-existing user path and `.planning/` unless the user explicitly includes them;
-   - if pre-existing staged user changes exist, stop and get the user's chosen isolation method first;
-   - stage explicit paths only, never `git add -A` or `git add .`;
-   - review the staged change for secrets, debug leftovers, and out-of-scope files. Read the staged diff directly when it is small; delegate a read-only staged-diff `verify` dispatch when it is large;
-   - commit with a concise message that reflects the completed work;
-   - never push, merge, deploy, or delete artifacts without a separate request.
-8. Report plan path, report paths, changed files, checks and results, unavailable checks, and commit status.
-</phase_6>
+- For a non-material defect or adjustment inside the plan's scope, assign `USER-<n>` IDs, dispatch or resume the executor in `fix` mode with a fresh report path, have it run the relevant checks, repeat Step 6, and ask again. Repeat for each user-requested change round.
+- For a material request that changes scope, contracts, architecture, data handling, security, or acceptance, report that a new suffixed plan package is required. Do not let the executor improvise it.
+- End cleanly if the commit is declined.
+</step>
+
+<step number="8" name="commit">
+
+After explicit approval, recheck branch, `HEAD`, and git status. Stage only explicit, session-scoped paths that are both executor-reported and in the plan allowlist; exclude `.planning/` and protected user paths unless the user expressly includes them. If protected staged work exists, ask for an isolation decision. Review the staged change for secrets, debug leftovers, and scope; use a staged-diff verifier when the diff is too large to inspect directly. Commit with a concise message, and report artifact paths, changed files, checks, unavailable checks, and commit status.
+</step>
 </workflow>
 
 <resume_behavior>
 
-- `/mt {task}` with an existing matching plan directory: report what exists, never assume prior approval, re-present the gate, then continue.
-- `/mt {path-to-plan.md}`: validate `MT-Plan-Contract: 1` and `Status: READY`, re-present the gate for current-session approval, then execute.
-- An existing `execution-report.md` means implementation already ran. Confirm state from report headers and git metadata before dispatching anything new.
+- For an existing matching package, inspect artifact headers and git metadata, never assume prior approval, then re-present the current plan gate.
+- For a direct `plan.md` path, require `MT-Plan-Contract: 1` and `Status: READY`, obtain current-session approval, then continue at Step 5.
+- For an existing execution report, confirm its state from headers and git metadata before choosing a fix, verification, satisfaction, or commit step.
 </resume_behavior>
-
-<constraints>
-
-- Never write or edit plan content, source, or tests in the orchestrator.
-- Never dispatch execution before current-session plan approval.
-- Never let one sub-agent both plan and implement the same task.
-- Never mutate a `READY` plan; create a suffixed package instead.
-- Never read source, full diffs, or full logs when compact metadata and reports are enough.
-- Never let a sub-agent stage, commit, push, deploy, switch branches, or clean the tree.
-- Never touch pre-existing staged, unstaged, or untracked user work.
-- Never commit without explicit current-session approval, and never push without a separate request.
-- Never include secrets, credentials, tokens, or sensitive values in artifacts or reports.
-- Never exceed two question rounds, two plan revision rounds, or two orchestrator-initiated fix and verify rounds. User-requested change rounds are not capped, but each one still ends in verification and the satisfaction gate, and the two-attempt limit per root cause always applies.
-- Never require the user to start in a particular interaction mode, and never implement while a planning mode is still active.
-- Always keep sub-agent returns compact and detailed evidence on disk.
-</constraints>
 
 <success_criteria>
 
-- The task was classified and `mt` confirmed as the right weight.
-- The run worked from whichever interaction mode the user started in, and implementation began only after the plan gate.
-- The baseline was recorded and pre-existing user work stayed untouched.
-- A planner sub-agent produced a `READY`, fresh-session-sufficient `plan.md`.
-- Plan-shaping questions were answered by the user through the orchestrator.
-- The plan passed the gate checklist and the user approved it in this session.
-- A separate executor sub-agent implemented the plan and self-verified it.
-- Independent verification ran when a risk trigger fired, and findings were repaired within the round limit.
-- Every user-reported defect or requested change was handled in this session by a resumed or fresh executor, re-verified, and returned to the satisfaction gate.
-- Detailed evidence lives in report artifacts, and the orchestrator kept a compact context.
-- The user was asked the satisfaction question, and only approved, session-scoped, allowlisted paths were committed.
+- A separate planner produced a self-contained reviewed plan, and the user approved its implementation in this session.
+- The planner promoted the approved artifact to an immutable `READY` plan before a separate executor implemented it.
+- User work remained protected; evidence reports document implementation, fixes, and any independent verification.
+- Every non-material user change was verified and returned to the satisfaction gate; material changes were replanned.
+- Only explicitly approved, allowlisted session work was committed.
 </success_criteria>

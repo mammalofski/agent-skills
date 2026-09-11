@@ -43,10 +43,12 @@ Do not:
 - Confirm repository root, branch, `HEAD`, `Plan-Directory`, `Plan-Path`, `Feature-Input-Artifacts`, protected pre-existing paths, host planning mode, and round.
 - Require `Plan-Directory` to be `.planning/navoid-plans/<feature-slug>/` under the repository root and `Plan-Path` to be that directory's `plan.md`. Return `BLOCKED: invalid-artifact-path` if either path is outside the feature workspace.
 - Confirm the branch and `HEAD` match the dispatch. Report drift instead of planning around it.
-- If `Plan-Path` already holds a `Status: READY` plan and your round is not `revision-N` or `persist`, stop and return `BLOCKED: plan-exists`.
+- A `Status: READY` plan is locked. Never edit it; return `BLOCKED: plan-locked`.
+- A `Status: REVIEW` plan may be changed only in `answers-N` or `revision-N` rounds, or promoted in `promote` round.
 - For `Round: answers-N`, apply the user answers and revise only what they change.
 - For `Round: revision-N`, fix exactly the orchestrator findings and re-run steps 8 through 11.
-- For `Round: persist`, write the plan you already produced to `Plan-Path`, promote it to `READY`, and return. Do not re-plan.
+- For `Round: promote`, require an on-disk `Status: REVIEW` plan, change only its status to `READY`, and return. Do not re-plan or otherwise edit it.
+- For `Round: persist`, write the retained, user-approved plan to `Plan-Path` with `Status: READY`, and return. Do not re-plan.
 
 ### 2. Probe artifact writability early
 
@@ -57,7 +59,7 @@ Planning modes on some hosts block file writes. Before doing the deep work, crea
 
 ### 3. Create a scoped todo
 
-Cover: lock task, analyze, resolve gray areas, select approach, write steps, design tests, risks and controls, self-review, promote. Keep one item in progress.
+Cover: lock task, analyze, resolve gray areas, select approach, write steps, design tests, risks and controls, self-review, and submit for review. Keep one item in progress.
 
 ### 4. Lock the task and baseline
 
@@ -127,10 +129,10 @@ Walk the plan as an implementer who has never seen this conversation, and fix wh
 - collisions with the protected pre-existing paths;
 - secrets, credentials, tokens, customer data, or private hostnames anywhere in the plan.
 
-### 12. Promote and return
+### 12. Submit for review and return
 
-- Write the final plan to `Plan-Path` and change `Status: DRAFT` to `Status: READY`.
-- A `READY` plan has no plan-shaping open question.
+- Write the final plan to `Plan-Path` and change `Status: DRAFT` to `Status: REVIEW`.
+- A `REVIEW` plan has no plan-shaping open question. The orchestrator promotes it to `READY` only after the user approves implementation.
 - Return the compact planner contract.
 
 ## Required `plan.md` format
@@ -208,14 +210,14 @@ Created: <ISO-8601 timestamp>
 - [ ] Objective completion conditions.
 
 ## 13. Open questions
-- None. A READY plan has no plan-shaping open questions.
+- None. A REVIEW plan has no plan-shaping open questions.
 ```
 
 ## Return contract
 
 Return at most 10 bullets and about 350 words:
 
-- Status: `READY` | `NEEDS-INPUT` | `WRITE-BLOCKED` | `BLOCKED: <reason>`.
+- Status: `REVIEW` | `NEEDS-INPUT` | `WRITE-BLOCKED` | `BLOCKED: <reason>`.
 - Plan path and status line.
 - Goal in one sentence.
 - Selected approach in one or two sentences.
@@ -224,7 +226,7 @@ Return at most 10 bullets and about 350 words:
 - Focused checks and broader validators, as commands only.
 - Top risks.
 - Assumptions the user should know about.
-- For `NEEDS-INPUT`: the questions with options and your recommended default. For `WRITE-BLOCKED`: confirmation that you retain the full plan for a `persist` round.
+- For `NEEDS-INPUT`: the questions with options and your recommended default. For `WRITE-BLOCKED`: confirmation that you retain the full plan for a `persist` round and an attestation that it satisfies the plan gate checklist.
 
 Do not return the plan body, source excerpts, diffs, or a narrative replay.
 
@@ -237,5 +239,5 @@ Do not return the plan body, source excerpts, diffs, or a narrative replay.
 - Every step has What, Where, How, Why, Verify, and Expected.
 - Tests were designed after the steps and used to challenge them.
 - Risks, staging allowlist, and completion checklist exist.
-- The plan is self-contained for a fresh implementer and promoted to `READY`.
+- The plan is self-contained for a fresh implementer and submitted as `REVIEW`; only the orchestrator requests promotion to `READY` after user approval.
 - No implementation, git mutation, or user-facing question happened in this sub-agent.
