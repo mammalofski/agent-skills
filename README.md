@@ -37,6 +37,10 @@ Use this in a fresh session to execute a `READY` deep plan. It preserves the par
 
 This is the bounded-worker protocol used by `deep-execute`. It is installed alongside `deep-plan` and `deep-execute`, not invoked as a standalone whole-task workflow.
 
+### [generate-feature-spec](./skills/generate-feature-spec)
+
+Use this to turn a product brain dump or source document into a concise, repository-grounded feature specification. It saves the canonical result to `.planning/navoid-plans/<slug>/initial-specs.md` and captures existing-state context, product requirements, testable acceptance criteria, and only the open decisions that block implementation.
+
 ## Choosing a skill
 
 | Task shape | Skill |
@@ -45,3 +49,4 @@ This is the bounded-worker protocol used by `deep-execute`. It is installed alon
 | Debugging a known failure or regression | `qd` |
 | Medium change needing an approved durable plan | `mt` |
 | Large, multi-phase work with isolated worker packets | `deep-plan` then `deep-execute` |
+| Product brain dump needing a build-ready definition | `generate-feature-spec` |
