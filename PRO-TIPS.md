@@ -8,13 +8,16 @@
   - Unless the task is simple and you already have the plan, in which case, write the plan yourself, step by step.
 
   - **My current workflow:**
-    - For focused small-to-medium tasks:
-        - No matter the size, I always tell the agent to understand the task and ask clarifying questions, read code and context, plan properly, execute thoroughly, verify, and close cleanly. To do so efficiently, I use [quick-task](./skills/qt) and [quick-debug](./skills/qd) skills, which do all the workflow for me. Just replace your usual day-to-day tasks with `/qt <task description>` or `/qd <bug description>`.
+    - First, turn incoming requirements into final specifications:
+        - Whether I receive an externally authored feature spec or a brain dump, I use [generate-feature-spec](./skills/generate-feature-spec) to produce the initial specifications.
+        - I then use [discuss-gray-areas](./skills/discuss-gray-areas) to resolve the remaining product and functional gray areas and generate the final specifications.
+    - For focused small tasks:
+        - I use [quick-task](./skills/qt) for small implementation work. It has the agent understand the task and ask clarifying questions, read code and context, plan properly, execute thoroughly, verify, and close cleanly. For bugs, I use [quick-debug](./skills/qd). Just replace your usual day-to-day tasks with `/qt <task description>` or `/qd <bug description>`.
     - For medium-complexity features or changes:
         - Use [Medium Task](./skills/mt) when the work benefits from a durable, user-approved plan but does not need packetized parallel execution. It separates planning and implementation into two sub-agent roles in one session.
     - For large or complex tasks
-        - (optional but recommended) Prepare a well-crafted, feature and specs document. Have your initial requirements ready, then do a brainstorming session with the agent and have it ask all the questions it needs from me to map out all the possible gray areas (bonus [grill-me](https://www.aihero.dev/skills-grill-me) or [grill-with-docs](https://www.aihero.dev/grill-with-docs) skills) if you already have the initial docs ready.
-        - I first select plan mode in my agent (and select the most powerful model I have i.e. Opus 5 xhigh, optionally use the [deep-plan](./skills/deep-plan) skill), and ask the agent to analyze, think hard, look at everything, make a good understanding, and make a perfect plan in `.planning/navoid-plans/<slug>/plan.md` with as much detail as possible and an executive summary. I review the executive summary, ask for adjustments if needed, and then approve it.
+        - Start with the final specifications prepared above.
+        - I first select plan mode in my agent (and select the most powerful model I have i.e. Opus 5 xhigh), use [deep-plan](./skills/deep-plan), and ask the agent to analyze, think hard, look at everything, make a good understanding, and make a perfect plan in `.planning/navoid-plans/<slug>/plan.md` with as much detail as possible and an executive summary. I review the executive summary, ask for adjustments if needed, and then approve it.
         - (optional) Then have another agent revise the plan and improve.
         - Have a fresh session implement with [deep-execute](./skills/deep-execute). Install [sub-execute](./skills/sub-execute) alongside it; it supplies the bounded worker protocol used to preserve the executor's context.
         - Finally have a fourth agent write E2E tests and a UAT testing guide for me, and I manually test it thoroughly. Works 99% of the time with no issues.
